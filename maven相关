@@ -1,0 +1,63 @@
+JVM
+JVM的⼯作被设计地相当简单：
+• 执⾏⼀个类的字节码
+• 假如这个过程中碰到了新的类，加载它
+在哪⾥可以找到类
+• -classpath/-cp
+• 类的全限定类名（⽬录层级）唯⼀确定了⼀个类
+• 包就是把许多类放在⼀起打的压缩包 
+
+没有GUI的情况就得在命令行里看classpath
+
+传递性依赖
+• 你依赖的类还依赖了别的类
+Classpath hell
+• 全限定类名是类的唯⼀标识
+• 当多个同名类同时出现在Classpath中，就是噩梦的开始
+• JVM会选择靠前的那一个
+
+
+Maven的包
+• 按照约定为所有的包编号，⽅便检索
+• groupId/artifactId/version
+MVN不允许相同全限定类名不同版本的jar包进入classpath
+MVN使用的包冲突处理方式是选择离你的项目距离更近的那个jar包
+如果距离一样，那么就选靠前的那个
+
+查看传递性依赖的方法
+1.ide里直接看mvn的dependency
+2.命令行 mvn dependency:tree
+
+输出重定向到txt可以 mvn dependency:tree > d.txt
+用文本编辑器去看  vi d.txt
+
+如何手动处理包冲突
+1.项目直接依赖你要的那个版本的库，直接引入这个版本。在pom.xml里操作。他就是最近的。
+2.排除传递性依赖。
+在pom.xml里的你要删除的那个版本的上一层路径下面使用<exclusions><exclusion>然后输入你要删除的那个版本的groupId/artifactId
+
+
+或者如果你的IDEA装了maven helper插件的话，可以在pom.xml里看到下方有一个dependency Analyzer，打开之后再点一下Reimport，他会告诉你发生了什么。右键那个你想排除的包，选择exclude。
+
+
+scope
+范围的意思
+可以实现依赖的隔离
+例如<scope>test</scope>
+只有在test相关的代码可以看到这个类，在main的代码里看不到这个类。
+代码里写@test就是表示这个代码是一个测试类
+
+如果中间的是compile
+那就在main和test里都有效
+
+如果中间的是provided（有啥用呢，是编译的时候我用这个类，运行的时候有别人给我提供这个类，以防止发生包冲突。）
+只在编译main代码的时候有效，运行就无效
+编译是把源代码转为字节码的过程
+运行是让字节码开始运行的过程
+这样的话运行会抛出NoClassDefoundError错误
+
+pom文件里缺失什么就在mvn clean verify报错里找。
+
+
+Maven项⽬的基本结构（传世经典）
+• 基本概念：坐标和依赖/⽣命周期/仓库/聚合和继承 
